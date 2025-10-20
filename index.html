@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Objednávka tašek — WM Holešovice</title>
+<style>
+:root{
+  --wolt-blue-1:#00bfff; --wolt-blue-2:#007acc;
+  --bg:#f6f8fb; --card:#fff; --muted:#6b7280;
+  --red:#ff4c4c; --orange:#ff9b2f; --green:#2ecc71;
+  --radius:12px; --shadow:0 10px 30px rgba(15,23,42,0.08);
+}
+body.dark{
+  --bg:#071018; --card:#0b1220; --muted:#9aa4b2;
+  --red:#ff7b7b; --orange:#ffb567; --green:#6ee28f;
+  --shadow:0 12px 36px rgba(2,6,23,0.6);
+}
+body{margin:0;padding:12px;font-family:Inter,sans-serif;background:var(--bg);color:#0b1220;transition: background .3s,color .3s;}
+body.dark{color:#e6eef6;}
+.container{max-width:700px;margin:0 auto;display:flex;flex-direction:column;gap:16px;}
+.header{display:flex;gap:12px;align-items:center;flex-wrap:wrap;}
+.logo{width:56px;height:56px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:20px;background:linear-gradient(135deg,var(--wolt-blue-1),var(--wolt-blue-2)); box-shadow:var(--shadow);transition:transform .2s;}
+.logo:hover{transform:translateY(-2px);}
+.title{font-weight:800;font-size:18px;}
+.subtitle{font-size:13px;color:var(--muted);margin-top:4px;}
+.controls{margin-left:auto;display:flex;gap:12px;align-items:center;}
+.card{background:var(--card);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:12px;transition:transform .2s;}
+.card:hover{transform:translateY(-2px);}
+h2{margin:0 0 10px 0;color:var(--wolt-blue-2);}
+.inventory{display:flex;flex-direction:column;gap:12px;margin-top:6px;}
+.item{display:flex;gap:12px;align-items:center;padding:12px;border-radius:10px;transition:transform .2s,background .25s;}
+body:not(.dark) .item{background:linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.3));}
+.ic{width:46px;height:46px;border-radius:10px;display:flex;align-items:center;justify-content:center;background: linear-gradient(135deg, rgba(0,0,0,0.04), rgba(255,255,255,0.04));color:var(--wolt-blue-2);flex-shrink:0;transition:transform .2s;}
+.ic:hover{transform:translateY(-2px);}
+.meta{flex:1;min-width:0;}
+.meta .name{font-weight:700;font-size:14px;}
+.meta .code{font-size:12px;color:var(--muted);margin-top:4px;}
+.qty-container{display:flex;gap:4px;align-items:center;justify-content:flex-end;flex-shrink:0;min-width:130px;position:relative;}
+.qty-container input[type="number"], .order-row input[type="number"]{
+  width:60px;padding:6px;border-radius:6px;border:1px solid rgba(0,0,0,0.08);text-align:center;font-weight:700;background:transparent;color:inherit;transition:border .25s, color .25s, transform .2s;
+}
+body.dark .qty-container input[type="number"], body.dark .order-row input[type="number"]{
+  border:1px solid rgba(255,255,255,0.06);
+  color:white;
+  background: rgba(255,255,255,0.04);
+}
+.qty-btn{
+  padding:4px 8px;
+  border:none;
+  border-radius:6px;
+  background:var(--wolt-blue-1);
+  color:white;
+  font-weight:700;
+  cursor:pointer;
+  transition:transform .2s,background .2s,box-shadow .2s;
+}
+.qty-btn:hover{
+  transform:translateY(-2px);
+  box-shadow:0 6px 15px rgba(0,191,255,0.4);
+}
+.qty-btn:active{
+  transform:scale(0.95);
+  box-shadow:0 3px 10px rgba(0,191,255,0.4);
+}
+.progress-container{
+  width:100%;height:16px;background:#e6eef6;border-radius:8px;overflow:hidden;box-shadow:inset 0 -2px 4px rgba(0,0,0,0.08);
+}
+.progress-fill{
+  height:100%;
+  width:0%;
+  background:var(--wolt-blue-1);
+  transition: width 0.5s ease, background 0.3s ease;
+  border-radius:6px;
+}
+.progress-fill.red{background:var(--red);}
+.progress-fill.orange{background:var(--orange);}
+.progress-fill.green{background:var(--green);}
+.panel{display:flex;flex-direction:column;gap:14px;}
+.order-row{display:flex;gap:6px;align-items:center;margin-bottom:10px;flex-wrap:wrap;}
+.order-row .label{flex:1;font-weight:700;min-width:0;}
+.cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;}
+.btn-primary{display:inline-flex;gap:10px;align-items:center;background:linear-gradient(90deg,var(--wolt-blue-1),var(--wolt-blue-2));color:white;border:none;padding:12px 18px;border-radius:10px;cursor:pointer;font-weight:800;box-shadow:0 8px 20px rgba(0,120,200,0.16);transition:transform .2s;}
+.btn-primary:hover{transform:translateY(-2px);}
+.btn-ghost{background:transparent;border:1px solid rgba(0,0,0,0.06);padding:10px 12px;border-radius:10px;cursor:pointer;transition:transform .2s;}
+body.dark .btn-ghost{border:1px solid rgba(255,255,255,0.06);}
+.history-toggle{display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;margin-top:10px;color:var(--muted);transition:color .25s;}
+.history-toggle:hover{color:var(--wolt-blue-2);}
+.history-panel{margin-top:8px;max-height:0;overflow:hidden;transition:max-height .4s ease;}
+.history-panel.open{max-height:1000px;}
+.history-list{display:flex;flex-direction:column;gap:8px;margin-top:10px;}
+.history-item{background:var(--card);padding:10px;border-radius:8px;display:flex;justify-content:space-between;gap:12px;align-items:flex-start;box-shadow:var(--shadow);transition:transform .2s,opacity .3s;}
+.history-item:hover{transform:translateY(-1px);}
+.history-item .left{flex:1;}
+.small{font-size:13px;color:var(--muted);}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:28px;background:#111827;color:white;padding:10px 16px;border-radius:10px;display:none;z-index:9999;box-shadow:0 8px 30px rgba(2,6,23,0.6);}
+.toast.show{display:block;animation: pop .36s ease;}
+.dark-toggle{
+  width:40px;height:40px;display:flex;align-items:center;justify-content:center;
+  font-size:20px;border-radius:50%;cursor:pointer;transition:all 0.3s ease;
+  background:linear-gradient(135deg,#ffd700,#ff9b00);color:white;box-shadow:0 4px 12px rgba(0,0,0,0.15);
+}
+body.dark .dark-toggle{
+  background:linear-gradient(135deg,#1a1a2e,#0d1b2a);
+  color:#f0f0f0;
+  transform:rotate(180deg);
+}
+@media(max-width:560px){.container{padding:8px}.logo{width:48px;height:48px;font-size:16px}.btn-primary{width:100%;justify-content:center}}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div style="display:flex;gap:12px;align-items:center">
+      <div class="logo">WM</div>
+      <div>
+        <div class="title">Objednávka tašek — WM Holešovice</div>
+        <div class="subtitle">Přehled skladu • Rychlá objednávka</div>
+      </div>
+    </div>
+    <div class="controls">
+      <div id="darkToggle" class="dark-toggle">🌞</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Stav skladu (krabice)</h2>
+    <div class="inventory" id="inventoryList" aria-live="polite"></div>
+  </div>
+
+  <div class="card panel">
+    <h2>Objednávka (palety)</h2>
+    <div class="order-row"><div class="label">Velké tašky</div><button class="qty-btn" data-target="o1" data-op="-">-</button><input id="o1" type="number" min="0" value="0"><button class="qty-btn" data-target="o1" data-op="+">+</button></div>
+    <div class="order-row"><div class="label">Malé tašky</div><button class="qty-btn" data-target="o2" data-op="-">-</button><input id="o2" type="number" min="0" value="0"><button class="qty-btn" data-target="o2" data-op="+">+</button></div>
+    <div class="order-row"><div class="label">Velké sáčky</div><button class="qty-btn" data-target="o3" data-op="-">-</button><input id="o3" type="number" min="0" value="0"><button class="qty-btn" data-target="o3" data-op="+">+</button></div>
+    <div class="order-row"><div class="label">Malé sáčky</div><button class="qty-btn" data-target="o4" data-op="-">-</button><input id="o4" type="number" min="0" value="0"><button class="qty-btn" data-target="o4" data-op="+">+</button></div>
+
+    <div class="cta">
+      <button class="btn-primary" id="sendBtn">Odeslat do Gmailu</button>
+      <button class="btn-ghost" id="resetBtn">Reset</button>
+    </div>
+
+    <div class="history-toggle" id="historyToggle">▶ Historie objednávek</div>
+    <div class="history-panel" id="historyPanel">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="font-weight:700;color:var(--muted)">Poslední objednávky</div>
+        <button class="btn-ghost" id="clearHistory">Vymazat historii</button>
+      </div>
+      <div class="history-list" id="historyList"></div>
+    </div>
+  </div>
+
+  <div style="margin-top:6px;color:var(--muted);font-size:13px">
+  Hlavní příjemce: <strong>sklad.hrusov@vas-solutions.cz</strong><br>
+  Kopie: jan.navratil@axm.cz, julie.husakova@wolt.com, wm.holesovice@wolt.com
+  </div>
+
+  <div class="toast" id="toast">Uloženo do historie</div>
+</div>
+
+<script>
+const STORAGE_KEY="wm_sklad_final"; 
+const HISTORY_KEY="wm_orders_final"; 
+const HISTORY_LIMIT=20;
+const defaultData=[
+  { id:"132017040009", label:"Velké tašky 132017040009 Taška Wolt Market 320x170x400mm", qty:12 },
+  { id:"3122014030009", label:"Malé tašky 3122014030009 Taška Wolt Market 220x140x300mm", qty:5 },
+  { id:"32000100027000", label:"Velké sáčky 32000100027000 Sáček Wolt Market 200x90x370mm", qty:17 },
+  { id:"3160505028000", label:"Malé sáčky 3160505028000 Sáček Wolt Market 160x50x280mm", qty:9 }
+];
+let sklad=JSON.parse(localStorage.getItem(STORAGE_KEY)||JSON.stringify(defaultData));
+let history=JSON.parse(localStorage.getItem(HISTORY_KEY)||"[]");
+
+const inventoryList=document.getElementById("inventoryList");
+const historyList=document.getElementById("historyList");
+const o1=document.getElementById("o1"), o2=document.getElementById("o2"), o3=document.getElementById("o3"), o4=document.getElementById("o4");
+
+function getState(q){if(q<6)return"red";if(q<15)return"orange";return"green";}
+function clampInt(v,min=0){v=parseInt(v);if(isNaN(v))return min;return Math.max(min,v);}
+
+function renderInventory(){
+  inventoryList.innerHTML="";
+  sklad.forEach((it,idx)=>{
+    const qty=Number(it.qty||0);
+    const state=getState(qty);
+    const pct=Math.min(100, Math.round((qty/30)*100));
+    const div=document.createElement("div");
+    div.className="item";
+    div.innerHTML=`
+      <div class="ic">📦</div>
+      <div class="meta">
+        <div class="name">${it.label}</div>
+        <div class="code">${it.id}</div>
+        <div class="progress-container">
+          <div class="progress-fill ${state}" style="width:${pct}%"></div>
+        </div>
+      </div>
+      <div class="qty-container">
+        <button class="qty-btn" data-idx="${idx}" data-op="-">-</button>
+        <input type="number" min="0" value="${qty}" data-idx="${idx}" />
+        <button class="qty-btn" data-idx="${idx}" data-op="+">+</button>
+      </div>
+    `;
+    inventoryList.appendChild(div);
+
+    const input = div.querySelector('input[type=number]');
+    const fill = div.querySelector('.progress-fill');
+
+    input.addEventListener('input', e=>{
+      let v = clampInt(e.target.value,0);
+      sklad[idx].qty = v;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(sklad));
+      const pct=Math.min(100, Math.round(v/30*100));
+      fill.style.width=pct+'%';
+      fill.className='progress-fill '+getState(v);
+    });
+
+    div.querySelectorAll('.qty-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        let val=sklad[idx].qty + (btn.dataset.op==="+"?1:-1);
+        if(val<0) val=0;
+        sklad[idx].qty=val;
+        input.value=val;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(sklad));
+        const pct=Math.min(100, Math.round(val/30*100));
+        fill.style.width=pct+'%';
+        fill.className='progress-fill '+getState(val);
+      });
+    });
+  });
+}
+
+function onOrderBtnClick(e){
+  const target=document.getElementById(e.currentTarget.dataset.target);
+  let val=Number(target.value||0);
+  val+=e.currentTarget.dataset.op==="+"?1:-1;
+  if(val<0) val=0;
+  target.value=val;
+}
+
+function renderHistory(){
+  historyList.innerHTML="";
+  history.slice().reverse().forEach(h=>{
+    const div=document.createElement('div');
+    div.className='history-item';
+    div.innerHTML=`<div class="left"><div class="small">${h.date}</div>${h.text}</div>`;
+    historyList.appendChild(div);
+  });
+}
+
+document.getElementById("historyToggle").addEventListener("click",()=>{document.getElementById("historyPanel").classList.toggle("open");});
+document.getElementById("clearHistory").addEventListener("click",()=>{history=[]; localStorage.setItem(HISTORY_KEY,JSON.stringify(history)); renderHistory();});
+document.querySelectorAll('.order-row .qty-btn').forEach(b=>b.addEventListener('click',onOrderBtnClick));
+
+function sendMail(){
+  const counts=[o1.value,o2.value,o3.value,o4.value].map(Number);
+  const items=["Velké tašky","Malé tašky","Velké sáčky","Malé sáčky"];
+  let lines=[];
+  counts.forEach((c,i)=>{if(c>0)lines.push(`${c} paletu${c>1?'y':''} tašek (${items[i]})`);});
+  if(lines.length===0){alert("Zadejte alespoň jednu položku."); return;}
+  const body=`Dobrý den,\n\nprosím vás o objednání tašek na WM Holešovice\n${lines.join("\n")}\n\nDěkuji a přeji přijemný zbytek dne.`;
+  const mailto="mailto:sklad.hrusov@vas-solutions.cz?cc=jan.navratil@axm.cz,julie.husakova@wolt.com,wm.holesovice@wolt.com&subject=Objednávka tašek&body="+encodeURIComponent(body);
+  window.location.href=mailto;
+
+  const htext=lines.join(" | ");
+  history.push({date:(new Date()).toLocaleString(),text:htext});
+  if(history.length>HISTORY_LIMIT) history.shift();
+  localStorage.setItem(HISTORY_KEY,JSON.stringify(history));
+  renderHistory();
+}
+
+document.getElementById("sendBtn").addEventListener("click",sendMail);
+document.getElementById("resetBtn").addEventListener("click",()=>{o1.value=o2.value=o3.value=o4.value=0;});
+
+const darkToggle=document.getElementById("darkToggle");
+if(localStorage.getItem("THEME_KEY")==="dark"){document.body.classList.add("dark"); darkToggle.textContent="🌙";}
+darkToggle.addEventListener("click",()=>{
+  const isDark=document.body.classList.toggle("dark");
+  localStorage.setItem("THEME_KEY",isDark?"dark":"light");
+  darkToggle.textContent=isDark?"🌙":"🌞";
+});
+
+renderInventory();
+renderHistory();
+</script>
+</body>
+</html>
+
+
