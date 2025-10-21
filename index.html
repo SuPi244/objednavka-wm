@@ -71,7 +71,7 @@ body.dark .qty-container input[type="number"], body.dark .order-row input[type="
   height:100%;
   width:0%;
   background:linear-gradient(90deg,var(--red),var(--green));
-  transition: width 0.5s ease, background 0.3s ease;
+  transition: width 0.3s ease, background 0.3s ease;
   border-radius:6px;
 }
 .progress-fill.red{background:var(--red);}
@@ -182,7 +182,29 @@ body.dark #resetBtn:hover, body.dark #clearHistory:hover{
   <div class="toast" id="toast">Uloženo do historie</div>
 </div>
 
-<script>
+<script type="module">
+// --- Firebase ---
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAT_FkCvSszAWiRvf119VLzs4r597dCDsY",
+  authDomain: "wolt-tasky.firebaseapp.com",
+  databaseURL: "https://wolt-tasky-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "wolt-tasky",
+  storageBucket: "wolt-tasky.firebasestorage.app",
+  messagingSenderId: "611814484401",
+  appId: "1:611814484401:web:98338743cbf1f73c8a3590",
+  measurementId: "G-ERBTLVJ9DE"
+};
+
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+const db = getDatabase(app);
+const skladRef = ref(db, 'sklad');
+const historyRef = ref(db, 'history');
+
 const STORAGE_KEY="wm_sklad_final"; 
 const HISTORY_KEY="wm_orders_final"; 
 const HISTORY_LIMIT=20;
@@ -192,6 +214,7 @@ const defaultData=[
   { id:"32000100027000", label:"Velké sáčky 32000100027000 Sáček Wolt Market 200x90x370mm", qty:17 },
   { id:"3160505028000", label:"Malé sáčky 3160505028000 Sáček Wolt Market 160x50x280mm", qty:9 }
 ];
+
 let sklad=JSON.parse(localStorage.getItem(STORAGE_KEY)||JSON.stringify(defaultData));
 let history=JSON.parse(localStorage.getItem(HISTORY_KEY)||"[]");
 
@@ -199,18 +222,38 @@ const inventoryList=document.getElementById("inventoryList");
 const historyList=document.getElementById("historyList");
 const o1=document.getElementById("o1"), o2=document.getElementById("o2"), o3=document.getElementById("o3"), o4=document.getElementById("o4");
 
+onValue(skladRef, snapshot => {
+  const data = snapshot.val();
+  if(data) {
+    sklad = data;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(sklad));
+    renderInventory();
+  }
+});
+
+onValue(historyRef, snapshot => {
+  const data = snapshot.val();
+  history = data ? Object.values(data) : [];
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+  renderHistory();
+});
+
+function updateFirebaseSklad(){ set(skladRef, sklad); }
+function updateFirebaseHistory(){ set(historyRef, history); }
+
 function getState(q){if(q<6)return"red";if(q<15)return"orange";return"green";}
 function clampInt(v,min=0){v=parseInt(v);if(isNaN(v))return min;return Math.max(min,v);}
 
 function renderInventory(){
-  inventoryList.innerHTML="";
-  sklad.forEach((it,idx)=>{
-    const qty=Number(it.qty||0);
-    const state=getState(qty);
-    const pct=Math.min(100, Math.round((qty/30)*100));
-    const div=document.createElement("div");
-    div.className="item";
-    div.innerHTML=`
+  inventoryList.innerHTML = "";
+  sklad.forEach((it, idx) => {
+    const qty = Number(it.qty || 0);
+    const state = getState(qty);
+    const pct = Math.min(100, Math.round((qty / 30) * 100));
+
+    const div = document.createElement("div");
+    div.className = "item";
+    div.innerHTML = `
       <div class="ic">📦</div>
       <div class="meta">
         <div class="name">${it.label}</div>
@@ -230,25 +273,44 @@ function renderInventory(){
     const input = div.querySelector('input[type=number]');
     const fill = div.querySelector('.progress-fill');
 
-    input.addEventListener('input', e=>{
-      let v = clampInt(e.target.value,0);
-      sklad[idx].qty = v;
+    function updateQty(newQty) {
+      sklad[idx].qty = newQty;
       localStorage.setItem(STORAGE_KEY, JSON.stringify(sklad));
-      const pct=Math.min(100, Math.round(v/30*100));
-      fill.style.width=pct+'%';
-      fill.className='progress-fill '+getState(v);
-    });
+      updateFirebaseSklad();
 
-    div.querySelectorAll('.qty-btn').forEach(btn=>{
-      btn.addEventListener('click', ()=>{
-        let val=sklad[idx].qty + (btn.dataset.op==="+"?1:-1);
-        if(val<0) val=0;
-        sklad[idx].qty=val;
-        input.value=val;
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(sklad));
-        const pct=Math.min(100, Math.round(val/30*100));
-        fill.style.width=pct+'%';
-        fill.className='progress-fill '+getState(val);
+      const pct = Math.min(100, Math.round(newQty / 30 * 100));
+      const state = getState(newQty);
+
+      requestAnimationFrame(() => {
+        fill.style.width = pct + '%';
+        fill.className = 'progress-fill ' + state;
+      });
+    }
+
+    let typingTimeout;
+input.addEventListener('input', e => {
+  clearTimeout(typingTimeout);
+  typingTimeout = setTimeout(() => {
+    let v = parseInt(e.target.value);
+    if(isNaN(v) || v < 0) v = 0;
+    sklad[idx].qty = v;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(sklad));
+    updateFirebaseSklad();
+
+    const pct = Math.min(100, Math.round(v / 30 * 100));
+    const state = getState(v);
+    fill.style.width = pct + '%';
+    fill.className = 'progress-fill ' + state;
+  }, 50); // malá prodleva, aby se hodnota nestahovala
+});
+
+
+    div.querySelectorAll('.qty-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        let val = sklad[idx].qty + (btn.dataset.op === "+" ? 1 : -1);
+        if (val < 0) val = 0;
+        input.value = val;
+        updateQty(val);
       });
     });
   });
@@ -273,7 +335,12 @@ function renderHistory(){
 }
 
 document.getElementById("historyToggle").addEventListener("click",()=>{document.getElementById("historyPanel").classList.toggle("open");});
-document.getElementById("clearHistory").addEventListener("click",()=>{history=[]; localStorage.setItem(HISTORY_KEY,JSON.stringify(history)); renderHistory();});
+document.getElementById("clearHistory").addEventListener("click",()=>{
+  history=[]; 
+  localStorage.setItem(HISTORY_KEY,JSON.stringify(history)); 
+  renderHistory(); 
+  updateFirebaseHistory();
+});
 document.querySelectorAll('.order-row .qty-btn').forEach(b=>b.addEventListener('click',onOrderBtnClick));
 
 function sklonujPaletu(c){
@@ -297,6 +364,7 @@ function sendMail(){
   history.push({date:(new Date()).toLocaleString(),text:htext});
   if(history.length>HISTORY_LIMIT) history.shift();
   localStorage.setItem(HISTORY_KEY,JSON.stringify(history));
+  updateFirebaseHistory();
   renderHistory();
 }
 
@@ -316,6 +384,8 @@ renderHistory();
 </script>
 </body>
 </html>
+
+
 
 
 
