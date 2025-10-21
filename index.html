@@ -193,7 +193,7 @@ const firebaseConfig = {
   authDomain: "wolt-tasky.firebaseapp.com",
   databaseURL: "https://wolt-tasky-default-rtdb.europe-west1.firebasedatabase.app",
   projectId: "wolt-tasky",
-  storageBucket: "wolt-tasky.firebasestorage.app",
+  storageBucket: "wolt-tasky.firebasedestorage.app",
   messagingSenderId: "611814484401",
   appId: "1:611814484401:web:98338743cbf1f73c8a3590",
   measurementId: "G-ERBTLVJ9DE"
@@ -273,49 +273,36 @@ function renderInventory(){
     const input = div.querySelector('input[type=number]');
     const fill = div.querySelector('.progress-fill');
 
-    function updateQty(newQty) {
+    function updateQty(newQty){
       sklad[idx].qty = newQty;
       localStorage.setItem(STORAGE_KEY, JSON.stringify(sklad));
-      updateFirebaseSklad();
-
       const pct = Math.min(100, Math.round(newQty / 30 * 100));
       const state = getState(newQty);
-
-      requestAnimationFrame(() => {
-        fill.style.width = pct + '%';
-        fill.className = 'progress-fill ' + state;
-      });
+      fill.style.width = pct + '%';
+      fill.className = 'progress-fill ' + state;
     }
 
-    let typingTimeout;
-input.addEventListener('input', e => {
-  clearTimeout(typingTimeout);
-  typingTimeout = setTimeout(() => {
-    let v = parseInt(e.target.value);
-    if(isNaN(v) || v < 0) v = 0;
-    sklad[idx].qty = v;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(sklad));
-    updateFirebaseSklad();
-
-    const pct = Math.min(100, Math.round(v / 30 * 100));
-    const state = getState(v);
-    fill.style.width = pct + '%';
-    fill.className = 'progress-fill ' + state;
-  }, 50); // malá prodleva, aby se hodnota nestahovala
-});
-
+    // --- INPUT: jen update při blur ---
+    input.addEventListener('blur', e=>{
+      let v = parseInt(e.target.value);
+      if(isNaN(v) || v < 0) v = 0;
+      updateQty(v);
+      updateFirebaseSklad();
+    });
 
     div.querySelectorAll('.qty-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         let val = sklad[idx].qty + (btn.dataset.op === "+" ? 1 : -1);
         if (val < 0) val = 0;
-        input.value = val;
         updateQty(val);
+        input.value = val;
+        updateFirebaseSklad();
       });
     });
   });
 }
 
+// --- ORDER ---
 function onOrderBtnClick(e){
   const target=document.getElementById(e.currentTarget.dataset.target);
   let val=Number(target.value||0);
