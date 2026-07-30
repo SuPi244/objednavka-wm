@@ -437,6 +437,7 @@ function loadOrderDraft(branchKey) {
 }
 
 function initBranch(branchKey) {
+  // Uložit koncept stávající pobočky než přepneme na novou
   if (currentBranchKey && currentBranchKey !== branchKey) {
     saveCurrentOrderDraft(currentBranchKey);
   }
@@ -451,6 +452,9 @@ function initBranch(branchKey) {
   pageTitle.textContent = `Objednávka materiálu — ${branchData.name}`;
   ccList.textContent = branchData.emailCc;
 
+  // Načíst správný koncept objednávky hned při inicializaci
+  loadOrderDraft(branchKey);
+
   skladRef = ref(db, `sklad/${branchKey}`);
   historyRef = ref(db, `history/${branchKey}`);
 
@@ -464,8 +468,6 @@ function initBranch(branchKey) {
   }
 
   history = JSON.parse(localStorage.getItem(storageKeyHistory) || "[]");
-
-  loadOrderDraft(branchKey);
 
   // Reálný poslech pro Sklad
   onValue(skladRef, snapshot => {
