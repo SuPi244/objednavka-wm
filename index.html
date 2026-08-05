@@ -154,6 +154,30 @@ body.dark .unit-toggle-btn.unit-pieces {
   background: rgba(34,197,94,0.25);
 }
 
+/* STYL PRO VOLITELNOU POZNÁMKU PRO ŽIŽKOV */
+.zizkov-note-container {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  background: rgba(34,197,94,0.08);
+  border: 1px dashed var(--wolt-green-1);
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+}
+body.dark .zizkov-note-container {
+  background: rgba(34,197,94,0.12);
+}
+.zizkov-note-container input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--wolt-green-1);
+  cursor: pointer;
+}
+
 .cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;}
 .btn-primary{display:inline-flex;gap:10px;align-items:center;background:linear-gradient(90deg,var(--wolt-green-1),var(--wolt-green-2));color:white;border:none;padding:12px 18px;border-radius:10px;cursor:pointer;font-weight:800;box-shadow:0 8px 20px rgba(34,197,94,0.25);transition:transform .2s;}
 .btn-primary:hover{transform:translateY(-2px);}
@@ -271,6 +295,12 @@ body.dark #resetBtn:hover, body.dark #clearHistory:hover{
       </div>
     </div>
 
+    <!-- VOLITELNÁ POZNÁMKA PRO ŽIŽKOV -->
+    <label class="zizkov-note-container" id="zizkovNoteContainer">
+      <input type="checkbox" id="zizkovElevatorCheck" checked>
+      <span>Přidat poznámku o výšce palet do 180cm (kvůli výtahu)</span>
+    </label>
+
     <div class="cta">
       <button class="btn-primary" id="sendBtn">Odeslat do Gmailu</button>
       <button class="btn-ghost" id="resetBtn">Reset</button>
@@ -355,6 +385,9 @@ const pageTitle = document.getElementById("pageTitle");
 const ccList = document.getElementById("ccList");
 const inventoryContainer = document.getElementById("inventoryContainer");
 const historyList = document.getElementById("historyList");
+const zizkovNoteContainer = document.getElementById("zizkovNoteContainer");
+const zizkovElevatorCheck = document.getElementById("zizkovElevatorCheck");
+
 const oInputs = [
   document.getElementById("o1"),
   document.getElementById("o2"),
@@ -445,6 +478,13 @@ function initBranch(branchKey) {
   currentBranchKey = branchKey;
   localStorage.setItem("selected_branch", branchKey);
 
+  // Zobrazení/Skrytí volby pro výtah na Žižkově
+  if (branchKey === "zizkov") {
+    zizkovNoteContainer.style.display = "flex";
+  } else {
+    zizkovNoteContainer.style.display = "none";
+  }
+
   if(skladRef) off(skladRef);
   if(historyRef) off(historyRef);
 
@@ -461,22 +501,30 @@ function initBranch(branchKey) {
   const storageKeySklad = `wm_sklad_${branchKey}`;
   const storageKeyHistory = `wm_orders_${branchKey}`;
 
-  sklad = JSON.parse(localStorage.getItem(storageKeySklad) || JSON.stringify(defaultData));
-  
-  if (sklad.length !== defaultData.length) {
-    sklad = defaultData.map((d, i) => sklad[i] ? { ...sklad[i], label: d.label, type: d.type } : d);
+  // Bezpečné načtení z localStorage
+  const localSklad = localStorage.getItem(storageKeySklad);
+  if (localSklad) {
+    try { sklad = JSON.parse(localSklad); } catch(e){}
+  } else {
+    sklad = JSON.parse(JSON.stringify(defaultData));
   }
 
   history = JSON.parse(localStorage.getItem(storageKeyHistory) || "[]");
 
-  // Reálný poslech pro Sklad
+  // Reálný poslech pro Sklad (BEZPEČNÝ PROTI PŘEPSÁNÍ)
   onValue(skladRef, snapshot => {
     const data = snapshot.val();
-    if(data && Array.isArray(data) && data.length === defaultData.length) {
-      sklad = data.map((item, idx) => ({ ...item, label: defaultData[idx].label, type: defaultData[idx].type }));
+    if (data && Array.isArray(data)) {
+      sklad = data.map((item, idx) => ({
+        ...item,
+        label: defaultData[idx] ? defaultData[idx].label : item.label,
+        type: defaultData[idx] ? defaultData[idx].type : item.type
+      }));
       localStorage.setItem(storageKeySklad, JSON.stringify(sklad));
       renderInventory();
     } else {
+      // Pouze pokud ve Firebase data pro danou pobočku ZATÍM VŮBEC NEEXISTUJÍ
+      sklad = JSON.parse(JSON.stringify(defaultData));
       updateFirebaseSklad();
     }
   });
@@ -722,6 +770,12 @@ function sendMail(){
   const currentBranch = BRANCHES[currentBranchKey];
   const subjectBranchName = currentBranch.name.replace(/^WM\s*/, "Wolt Market ");
 
+  // Příprava poznámky pro Žižkov
+  let extraNote = "";
+  if (currentBranchKey === "zizkov" && zizkovElevatorCheck.checked) {
+    extraNote = "\n\nProsím, aby palety nepřesahovaly 180cm (i s paletou) a případně nezapomenout na rohovníky, aby se nezbortily. 🙏 (Musíme se vejít do výtahu)";
+  }
+
   const body = 
 `Dobrý den,
 
@@ -729,7 +783,7 @@ prosím o objednání pro pobočku ${currentBranch.name}:
 
 --------------------------------------------------
 ${emailLines.join("\n\n")}
---------------------------------------------------
+--------------------------------------------------${extraNote}
 
 Děkuji a přeji příjemný zbytek dne.`;
 
