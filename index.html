@@ -1,795 +1,1651 @@
 <!DOCTYPE html>
+
 <html lang="cs">
+
 <head>
+
 <meta charset="utf-8">
+
 <meta name="viewport" content="width=device-width,initial-scale=1">
+
 <title>Objednávka materiálu — Wolt Market</title>
+
 <style>
+
 :root{
+
   --wolt-green-1:#22c55e; --wolt-green-2:#15803d; --wolt-green-light:#dcfce7;
+
   --bg:#f4f9f5; --card:#fff; --muted:#64748b;
+
   --red:#ef4444; --orange:#f97316; --green:#22c55e;
+
   --radius:12px; --shadow:0 10px 30px rgba(15,23,42,0.06);
+
 }
+
 body.dark{
+
   --bg:#09120c; --card:#101d14; --muted:#94a3b8;
+
   --red:#f87171; --orange:#fb923c; --green:#4ade80;
+
   --shadow:0 12px 36px rgba(0,0,0,0.5);
+
 }
+
 body{margin:0;padding:12px;font-family:Inter,sans-serif;background:var(--bg);color:#0f172a;transition: background .3s,color .3s;}
+
 body.dark{color:#f1f5f9;}
+
 .container{max-width:700px;margin:0 auto;display:flex;flex-direction:column;gap:16px;}
+
 .header{display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:space-between;}
+
 .logo{width:56px;height:56px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:20px;background:linear-gradient(135deg,var(--wolt-green-1),var(--wolt-green-2)); box-shadow:var(--shadow);transition:transform .2s;}
+
 .logo:hover{transform:translateY(-2px);}
+
 .title{font-weight:800;font-size:18px;}
+
 .subtitle{font-size:13px;color:var(--muted);margin-top:4px;}
+
 .controls{display:flex;gap:12px;align-items:center;}
 
+
+
 .branch-select {
+
   padding: 8px 12px;
+
   border-radius: 8px;
+
   border: 1px solid var(--wolt-green-1);
+
   background: var(--card);
+
   color: inherit;
+
   font-weight: 700;
+
   font-size: 14px;
+
   cursor: pointer;
+
 }
+
+
 
 .card{background:var(--card);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:12px;transition:transform .2s;}
+
 .card:hover{transform:translateY(-2px);}
+
 h2{margin:0 0 10px 0;color:var(--wolt-green-2);}
+
 body.dark h2{color:var(--wolt-green-1);}
+
 .inventory-section{display:flex;flex-direction:column;gap:10px;margin-bottom:8px;}
+
 .section-header{display:flex;justify-content:space-between;align-items:center;font-weight:700;color:var(--muted);font-size:13px;text-transform:uppercase;letter-spacing:0.5px;padding-bottom:4px;border-bottom:1px solid rgba(0,0,0,0.06);}
+
 body.dark .section-header{border-bottom:1px solid rgba(255,255,255,0.08);}
+
 .item{display:flex;gap:12px;align-items:center;padding:12px;border-radius:10px;transition:transform .2s,background .25s;}
+
 body:not(.dark) .item{background:linear-gradient(180deg, rgba(255,255,255,0.8), rgba(240,253,244,0.5));}
+
 .ic{width:46px;height:46px;border-radius:10px;display:flex;align-items:center;justify-content:center;background: linear-gradient(135deg, rgba(34,197,94,0.1), rgba(21,128,61,0.1));color:var(--wolt-green-2);flex-shrink:0;transition:transform .2s;font-size:20px;}
+
 body.dark .ic{color:var(--wolt-green-1);}
+
 .ic:hover{transform:translateY(-2px);}
+
 .meta{flex:1;min-width:0;}
+
 .meta .name{font-weight:700;font-size:14px;}
+
 .meta .code{font-size:12px;color:var(--muted);margin-top:4px;}
+
 .qty-container{display:flex;gap:4px;align-items:center;justify-content:flex-end;flex-shrink:0;min-width:130px;position:relative;}
+
 .qty-container input[type="number"], .order-row input[type="number"]{
+
   width:60px;padding:8px;border-radius:8px;border:1px solid rgba(0,0,0,0.1);text-align:center;font-weight:700;background:transparent;color:inherit;transition:border .25s, color .25s, transform .2s;font-size:14px;
+
 }
+
 body.dark .qty-container input[type="number"], body.dark .order-row input[type="number"]{
+
   border:1px solid rgba(255,255,255,0.1);
+
   color:white;
+
   background: rgba(255,255,255,0.04);
+
 }
+
 .qty-btn{
+
   padding:6px 12px;
+
   border:none;
+
   border-radius:8px;
+
   background:var(--wolt-green-1);
+
   color:white;
+
   font-weight:700;
+
   cursor:pointer;
+
   transition:transform .2s,background .2s,box-shadow .2s;
+
   font-size:14px;
+
 }
+
 .qty-btn:hover{
+
   transform:translateY(-2px);
+
   box-shadow:0 6px 15px rgba(34,197,94,0.4);
+
 }
+
 .qty-btn:active{
+
   transform:scale(0.95);
+
   box-shadow:0 3px 10px rgba(34,197,94,0.4);
+
 }
+
 .progress-container{
+
   width:100%;height:16px;background:#e2e8f0;border-radius:8px;overflow:hidden;box-shadow:inset 0 -2px 4px rgba(0,0,0,0.06);margin-top:4px;
+
 }
+
 body.dark .progress-container{background:#1e293b;}
+
 .progress-fill{
+
   height:100%;
+
   width:0%;
+
   background:linear-gradient(90deg,var(--red),var(--green));
+
   transition: width 0.3s ease, background 0.3s ease;
+
   border-radius:6px;
+
 }
+
 .progress-fill.red{background:var(--red);}
+
 .progress-fill.orange{background:var(--orange);}
+
 .progress-fill.green{background:var(--green);}
+
 .panel{display:flex;flex-direction:column;gap:14px;}
 
+
+
 .order-row{
+
   display:flex;
+
   justify-content:space-between;
+
   align-items:center;
+
   margin-bottom:10px;
+
   flex-wrap:wrap;
+
   gap:10px;
+
 }
+
 .order-row .label{
+
   flex:1;
+
   font-weight:700;
+
   min-width:160px;
+
 }
+
+
 
 .order-controls-group {
+
   display:flex;
+
   gap:6px;
+
   align-items:center;
+
   margin-left:auto;
+
 }
+
+
 
 .unit-toggle-btn {
+
   padding: 7px 10px;
+
   border-radius: 8px;
+
   font-size: 11px;
+
   font-weight: 800;
+
   cursor: pointer;
+
   transition: all .2s ease;
+
   text-transform: uppercase;
+
   letter-spacing: 0.3px;
+
   min-width: 68px;
+
   text-align: center;
+
   margin-left: 4px;
+
 }
+
 .unit-toggle-btn.unit-palette {
+
   background: var(--wolt-green-1);
+
   color: white;
+
   border: 1px solid var(--wolt-green-1);
+
   box-shadow: 0 2px 8px rgba(34,197,94,0.3);
+
 }
+
 .unit-toggle-btn.unit-palette:hover {
+
   background: var(--wolt-green-2);
+
   border-color: var(--wolt-green-2);
+
 }
+
 .unit-toggle-btn.unit-pieces {
+
   background: var(--wolt-green-light);
+
   color: var(--wolt-green-2);
+
   border: 1px solid rgba(34,197,94,0.3);
+
 }
+
 body.dark .unit-toggle-btn.unit-pieces {
+
   background: rgba(34,197,94,0.15);
+
   color: #4ade80;
+
   border: 1px solid rgba(74,222,128,0.3);
+
 }
+
 .unit-toggle-btn.unit-pieces:hover {
+
   background: rgba(34,197,94,0.25);
+
 }
+
+
+
+/* STYL PRO VOLITELNOU POZNÁMKU PRO ŽIŽKOV */
 
 .zizkov-note-container {
+
   display: none;
+
   align-items: center;
+
   gap: 10px;
+
   background: rgba(34,197,94,0.08);
+
   border: 1px dashed var(--wolt-green-1);
+
   padding: 10px 14px;
+
   border-radius: 8px;
+
   font-size: 13px;
+
   font-weight: 600;
+
   cursor: pointer;
+
   user-select: none;
+
 }
+
 body.dark .zizkov-note-container {
+
   background: rgba(34,197,94,0.12);
+
 }
+
 .zizkov-note-container input[type="checkbox"] {
+
   width: 18px;
+
   height: 18px;
+
   accent-color: var(--wolt-green-1);
+
   cursor: pointer;
+
 }
+
+
 
 .cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;}
+
 .btn-primary{display:inline-flex;gap:10px;align-items:center;background:linear-gradient(90deg,var(--wolt-green-1),var(--wolt-green-2));color:white;border:none;padding:12px 18px;border-radius:10px;cursor:pointer;font-weight:800;box-shadow:0 8px 20px rgba(34,197,94,0.25);transition:transform .2s;}
+
 .btn-primary:hover{transform:translateY(-2px);}
+
 .btn-ghost{background:transparent;border:1px solid rgba(0,0,0,0.1);padding:10px 12px;border-radius:10px;cursor:pointer;transition:transform .2s;}
+
 .btn-ghost:hover{background:rgba(0,0,0,0.05);}
+
 body.dark .btn-ghost{
+
   border:1px solid rgba(255,255,255,0.1);
+
   color:white;
+
 }
+
 body.dark .btn-ghost:hover{background:rgba(255,255,255,0.08);}
+
 .history-toggle{display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;margin-top:10px;color:var(--muted);transition:color .25s;}
+
 .history-toggle:hover{color:var(--wolt-green-1);}
+
 .history-panel{margin-top:8px;max-height:0;overflow:hidden;transition:max-height .4s ease;}
+
 .history-panel.open{max-height:1000px;}
+
 .history-list{display:flex;flex-direction:column;gap:8px;margin-top:10px;}
+
 .history-item{background:var(--card);padding:12px;border-radius:8px;display:flex;flex-direction:column;gap:6px;box-shadow:var(--shadow);transition:transform .2s,opacity .3s;border-left:4px solid var(--wolt-green-1);}
+
 .history-item:hover{transform:translateY(-1px);}
+
 .history-item .history-date{font-size:12px;font-weight:700;color:var(--muted);border-bottom:1px dashed rgba(0,0,0,0.1);padding-bottom:4px;}
+
 body.dark .history-item .history-date{border-bottom:1px dashed rgba(255,255,255,0.1);}
+
 .dark-toggle{
+
   width:40px;height:40px;display:flex;align-items:center;justify-content:center;
+
   font-size:20px;border-radius:50%;cursor:pointer;transition:all 0.3s ease;
+
   background:linear-gradient(135deg,#ffd700,#ff9b00);color:white;box-shadow:0 4px 12px rgba(0,0,0,0.15);
+
 }
+
 body.dark .dark-toggle{
+
   background:linear-gradient(135deg,#15803d,#052e16);
+
   color:#f0f0f0;
+
   transform:rotate(180deg);
+
 }
+
 body.dark #resetBtn, body.dark #clearHistory{
+
   color:white;
+
   background:rgba(255,255,255,0.05);
+
   border:1px solid rgba(255,255,255,0.15);
+
 }
+
 body.dark #resetBtn:hover, body.dark #clearHistory:hover{
+
   background:rgba(255,255,255,0.15);
+
 }
+
 @media(max-width:560px){.container{padding:8px}.logo{width:48px;height:48px;font-size:16px}.btn-primary{width:100%;justify-content:center}}
+
 </style>
+
 </head>
+
 <body>
+
 <div class="container">
+
   <div class="header">
+
     <div style="display:flex;gap:12px;align-items:center">
+
       <div class="logo">WM</div>
+
       <div>
+
         <div class="title" id="pageTitle">Objednávka materiálu</div>
+
         <div class="subtitle">Přehled skladu • Rychlá objednávka</div>
+
       </div>
+
     </div>
+
     <div class="controls">
+
+      <!-- VÝBĚR POBOČKY -->
+
       <select id="branchSelect" class="branch-select"></select>
+
       <div id="darkToggle" class="dark-toggle">🌞</div>
+
     </div>
+
   </div>
+
+
 
   <!-- INVENTORY -->
+
   <div class="card">
+
     <h2>Stav skladu</h2>
+
     <div id="inventoryContainer" aria-live="polite"></div>
+
   </div>
+
+
 
   <!-- ORDER -->
+
   <div class="card panel">
+
     <h2>Objednávka</h2>
 
+
+
     <div class="order-row">
+
       <div class="label">Taška Wolt Market 320x170x400mm</div>
+
       <div class="order-controls-group">
+
         <button class="qty-btn" data-target="o1" data-op="-">-</button>
+
         <input id="o1" type="number" min="0" step="0.5" value="0" data-unit="palette">
+
         <button class="qty-btn" data-target="o1" data-op="+">+</button>
+
         <button class="unit-toggle-btn unit-palette" data-input="o1" data-unit="palette">Palety</button>
+
       </div>
+
     </div>
+
     
+
     <div class="order-row">
+
       <div class="label">Sáček Wolt Market 200x90x370mm</div>
+
       <div class="order-controls-group">
+
         <button class="qty-btn" data-target="o2" data-op="-">-</button>
+
         <input id="o2" type="number" min="0" step="1" value="0" data-unit="pieces">
+
         <button class="qty-btn" data-target="o2" data-op="+">+</button>
+
         <button class="unit-toggle-btn unit-pieces" data-input="o2" data-unit="pieces">Balení</button>
+
       </div>
+
     </div>
 
+
+
     <div class="order-row">
+
       <div class="label">Sáček Wolt Market 160x50x280mm</div>
+
       <div class="order-controls-group">
+
         <button class="qty-btn" data-target="o3" data-op="-">-</button>
+
         <input id="o3" type="number" min="0" step="1" value="0" data-unit="pieces">
+
         <button class="qty-btn" data-target="o3" data-op="+">+</button>
+
         <button class="unit-toggle-btn unit-pieces" data-input="o3" data-unit="pieces">Balení</button>
+
       </div>
+
     </div>
 
+
+
     <div class="order-row">
+
       <div class="label">Vločky nálepky</div>
+
       <div class="order-controls-group">
+
         <button class="qty-btn" data-target="o4" data-op="-" data-step="1">-</button>
+
         <input id="o4" type="number" min="0" step="1" value="0" data-unit="pieces">
+
         <button class="qty-btn" data-target="o4" data-op="+" data-step="1">+</button>
+
         <div style="font-size:11px;color:var(--muted);font-weight:800;padding:0 4px;text-transform:uppercase;min-width:68px;text-align:center;">balení</div>
+
       </div>
+
     </div>
 
+
+
     <div class="order-row">
+
       <div class="label">Uzavření tašky nálepky</div>
+
       <div class="order-controls-group">
+
         <button class="qty-btn" data-target="o5" data-op="-" data-step="1">-</button>
+
         <input id="o5" type="number" min="0" step="1" value="0" data-unit="pieces">
+
         <button class="qty-btn" data-target="o5" data-op="+" data-step="1">+</button>
+
         <div style="font-size:11px;color:var(--muted);font-weight:800;padding:0 4px;text-transform:uppercase;min-width:68px;text-align:center;">balení</div>
+
       </div>
+
     </div>
+
+
+
+    <!-- VOLITELNÁ POZNÁMKA PRO ŽIŽKOV -->
 
     <label class="zizkov-note-container" id="zizkovNoteContainer">
+
       <input type="checkbox" id="zizkovElevatorCheck" checked>
+
       <span>Přidat poznámku o výšce palet do 180cm (kvůli výtahu)</span>
+
     </label>
 
+
+
     <div class="cta">
+
       <button class="btn-primary" id="sendBtn">Odeslat do Gmailu</button>
+
       <button class="btn-ghost" id="resetBtn">Reset</button>
+
     </div>
+
+
 
     <div class="history-toggle" id="historyToggle">▶ Historie objednávek</div>
+
     <div class="history-panel" id="historyPanel">
+
       <div style="display:flex;justify-content:space-between;align-items:center">
+
         <div style="font-weight:700;color:var(--muted)">Poslední objednávky</div>
+
         <button class="btn-ghost" id="clearHistory">Vymazat historii</button>
+
       </div>
+
       <div class="history-list" id="historyList"></div>
+
     </div>
+
   </div>
+
+
 
   <div style="margin-top:6px;color:var(--muted);font-size:13px" id="footerInfo">
+
     Hlavní příjemce: <strong>sklad.hrusov@vas-solutions.cz</strong><br>
+
     Kopie: <span id="ccList"></span>
+
   </div>
+
 </div>
 
+
+
 <script type="module">
+
 // --- Firebase ---
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getDatabase, ref, set, push, onValue, off, update } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+
+import { getDatabase, ref, set, push, onValue, off } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics.js";
 
+
+
 const firebaseConfig = {
+
   apiKey: "AIzaSyAT_FkCvSszAWiRvf119VLzs4r597dCDsY",
+
   authDomain: "wolt-tasky.firebaseapp.com",
+
   databaseURL: "https://wolt-tasky-default-rtdb.europe-west1.firebasedatabase.app",
+
   projectId: "wolt-tasky",
+
   storageBucket: "wolt-tasky.firebasedestorage.app",
+
   messagingSenderId: "611814484401",
+
   appId: "1:611814484401:web:98338743cbf1f73c8a3590",
+
   measurementId: "G-ERBTLVJ9DE"
+
 };
+
+
 
 const app = initializeApp(firebaseConfig);
+
 const analytics = getAnalytics(app);
+
 const db = getDatabase(app);
 
+
+
 // --- KONFIGURACE 4 POBOČEK ---
+
 const BRANCHES = {
+
   holesovice: {
+
     name: "WM Holešovice",
+
     emailCc: "jan.navratil@axm.cz, julie.husakova@wolt.com, wm.holesovice@wolt.com, sklad.kuncicky@vas-solutions.cz"
+
   },
+
   zizkov: {
+
     name: "WM Žižkov",
+
     emailCc: "jan.navratil@axm.cz, julie.husakova@wolt.com, wm.zizkov@wolt.com, sklad.kuncicky@vas-solutions.cz"
+
   },
+
   michle: {
+
     name: "WM Michle",
+
     emailCc: "jan.navratil@axm.cz, julie.husakova@wolt.com, woltmarket.michle.prague@wolt.com, sklad.kuncicky@vas-solutions.cz"
+
   },
+
   brno: {
+
     name: "WM Brno Střed",
+
     emailCc: "jan.navratil@axm.cz, julie.husakova@wolt.com, woltmarket.brno.stred@wolt.com, sklad.kuncicky@vas-solutions.cz"
+
   }
+
 };
 
+
+
 let currentBranchKey = localStorage.getItem("selected_branch");
+
 if (!BRANCHES[currentBranchKey]) {
+
   currentBranchKey = "holesovice";
+
 }
+
+
 
 const defaultData = [
+
   { id:"3132017040009", label:"Taška Wolt Market 320x170x400mm", qty:12, type:"palette" },
+
   { id:"32000100027000", label:"Sáček Wolt Market 200x90x370mm", qty:17, type:"palette" },
+
   { id:"3160505028000", label:"Sáček Wolt Market 160x50x280mm", qty:10, type:"palette" },
+
   { id:"8170050066", label:"Vločky nálepky", qty:25, type:"pieces" },
+
   { id:"8170075012", label:"Uzavření tašky nálepky", qty:25, type:"pieces" }
+
 ];
+
+
 
 let sklad = [];
+
 let history = [];
+
 let skladRef, historyRef;
 
+
+
 const branchSelect = document.getElementById("branchSelect");
+
 const pageTitle = document.getElementById("pageTitle");
+
 const ccList = document.getElementById("ccList");
+
 const inventoryContainer = document.getElementById("inventoryContainer");
+
 const historyList = document.getElementById("historyList");
+
 const zizkovNoteContainer = document.getElementById("zizkovNoteContainer");
+
 const zizkovElevatorCheck = document.getElementById("zizkovElevatorCheck");
 
+
+
 const oInputs = [
+
   document.getElementById("o1"),
+
   document.getElementById("o2"),
+
   document.getElementById("o3"),
+
   document.getElementById("o4"),
+
   document.getElementById("o5")
+
 ];
 
+
+
+// Naplnění výběru poboček
+
 Object.keys(BRANCHES).forEach(key => {
+
   const opt = document.createElement("option");
+
   opt.value = key;
+
   opt.textContent = BRANCHES[key].name;
+
   if(key === currentBranchKey) opt.selected = true;
+
   branchSelect.appendChild(opt);
+
 });
 
+
+
+// Vizualizace tlačítka přepínače jednotek
+
 function setToggleBtnState(btn, unit) {
+
   const input = document.getElementById(btn.dataset.input);
+
   input.dataset.unit = unit;
+
   btn.dataset.unit = unit;
+
   
+
   if (unit === "palette") {
+
     input.step = "0.5";
+
     btn.textContent = "Palety";
+
     btn.classList.remove("unit-pieces");
+
     btn.classList.add("unit-palette");
+
   } else {
+
     input.step = "1";
+
     btn.textContent = "Balení";
+
     btn.classList.remove("unit-palette");
+
     btn.classList.add("unit-pieces");
+
   }
+
 }
+
+
+
+// Uložení rozpracované objednávky pro danou pobočku
 
 function saveCurrentOrderDraft(branchKey) {
+
   if (!branchKey) return;
+
   const draftData = oInputs.map(input => {
+
     return {
+
       value: input.value || "0",
+
       unit: input.dataset.unit || "pieces"
+
     };
+
   });
+
   localStorage.setItem(`wm_order_draft_${branchKey}`, JSON.stringify(draftData));
+
 }
+
+
+
+// Načtení rozpracované objednávky pro danou pobočku
 
 function loadOrderDraft(branchKey) {
+
   const savedDraft = localStorage.getItem(`wm_order_draft_${branchKey}`);
+
   const defaultUnits = ["palette", "pieces", "pieces", "pieces", "pieces"];
 
+
+
   if (savedDraft) {
+
     try {
+
       const draftData = JSON.parse(savedDraft);
+
       oInputs.forEach((input, i) => {
+
         const item = draftData[i] || { value: "0", unit: defaultUnits[i] };
+
         input.value = item.value;
+
         const toggleBtn = document.querySelector(`.unit-toggle-btn[data-input="${input.id}"]`);
+
         if (toggleBtn) {
+
           setToggleBtnState(toggleBtn, item.unit);
+
         } else {
+
           input.dataset.unit = item.unit;
+
         }
+
       });
+
       return;
+
     } catch(e) { console.error("Chyba při načítání návrhu objednávky", e); }
+
   }
+
+
 
   oInputs.forEach((input, i) => {
+
     input.value = "0";
+
     const toggleBtn = document.querySelector(`.unit-toggle-btn[data-input="${input.id}"]`);
+
     if (toggleBtn) {
+
       setToggleBtnState(toggleBtn, defaultUnits[i]);
+
     } else {
+
       input.dataset.unit = defaultUnits[i];
+
     }
+
   });
+
 }
 
-function updateFirebaseItem(idx, newQty) {
-  const updates = {};
-  updates[`sklad/${currentBranchKey}/${idx}/qty`] = newQty;
-  update(ref(db), updates);
-}
+
 
 function initBranch(branchKey) {
+
+  // Uložit koncept stávající pobočky než přepneme na novou
+
   if (currentBranchKey && currentBranchKey !== branchKey) {
+
     saveCurrentOrderDraft(currentBranchKey);
+
   }
+
+
 
   currentBranchKey = branchKey;
+
   localStorage.setItem("selected_branch", branchKey);
 
+
+
+  // Zobrazení/Skrytí volby pro výtah na Žižkově
+
   if (branchKey === "zizkov") {
+
     zizkovNoteContainer.style.display = "flex";
+
   } else {
+
     zizkovNoteContainer.style.display = "none";
+
   }
 
+
+
   if(skladRef) off(skladRef);
+
   if(historyRef) off(historyRef);
 
+
+
   const branchData = BRANCHES[branchKey];
+
   pageTitle.textContent = `Objednávka materiálu — ${branchData.name}`;
+
   ccList.textContent = branchData.emailCc;
+
+
+
+  // Načíst správný koncept objednávky hned při inicializaci
 
   loadOrderDraft(branchKey);
 
+
+
   skladRef = ref(db, `sklad/${branchKey}`);
+
   historyRef = ref(db, `history/${branchKey}`);
 
+
+
   const storageKeySklad = `wm_sklad_${branchKey}`;
+
   const storageKeyHistory = `wm_orders_${branchKey}`;
 
+
+
+  // Bezpečné načtení z localStorage
+
   const localSklad = localStorage.getItem(storageKeySklad);
+
   if (localSklad) {
+
     try { sklad = JSON.parse(localSklad); } catch(e){}
+
   } else {
+
     sklad = JSON.parse(JSON.stringify(defaultData));
+
   }
+
+
 
   history = JSON.parse(localStorage.getItem(storageKeyHistory) || "[]");
 
+
+
+  // Reálný poslech pro Sklad (BEZPEČNÝ PROTI PŘEPSÁNÍ)
+
   onValue(skladRef, snapshot => {
+
     const data = snapshot.val();
+
     if (data && Array.isArray(data)) {
+
       sklad = data.map((item, idx) => ({
+
         ...item,
+
         label: defaultData[idx] ? defaultData[idx].label : item.label,
+
         type: defaultData[idx] ? defaultData[idx].type : item.type
+
       }));
+
       localStorage.setItem(storageKeySklad, JSON.stringify(sklad));
+
       renderInventory();
+
     } else {
+
+      // Pouze pokud ve Firebase data pro danou pobočku ZATÍM VŮBEC NEEXISTUJÍ
+
       sklad = JSON.parse(JSON.stringify(defaultData));
-      set(skladRef, sklad);
+
+      updateFirebaseSklad();
+
     }
+
   });
+
+
+
+  // Reálný poslech pro Historii
 
   onValue(historyRef, snapshot => {
+
     const data = snapshot.val();
+
     if(data) {
+
       history = Object.keys(data).map(key => data[key]);
+
       localStorage.setItem(storageKeyHistory, JSON.stringify(history));
+
       renderHistory();
+
     }
+
   });
 
+
+
   renderInventory();
+
   renderHistory();
+
 }
+
+
 
 branchSelect.addEventListener("change", (e) => {
+
   initBranch(e.target.value);
+
 });
 
+
+
+function updateFirebaseSklad(){ set(skladRef, sklad); }
+
+
+
 function getState(q, type){
+
   if(type === "pieces") {
+
     if(q < 5) return "red";
+
     if(q <= 20) return "orange";
+
     return "green";
+
   }
+
   if(q < 6) return "red";
+
   if(q < 15) return "orange";
+
   return "green";
+
 }
+
+
 
 function getPercentage(q, type){
+
   return Math.min(100, Math.round((q / 30) * 100));
+
 }
 
+
+
 function renderInventory(){
+
   const ksNaKrabici = [250, 500, 1000, 1, 1];
+
   inventoryContainer.innerHTML = "";
 
+
+
   const bagsSection = document.createElement("div");
+
   bagsSection.className = "inventory-section";
+
   bagsSection.innerHTML = `
+
     <div class="section-header">
+
       <span>Tašky a sáčky</span>
+
       <span>Balení</span>
+
     </div>
+
   `;
+
+
 
   const stickersSection = document.createElement("div");
+
   stickersSection.className = "inventory-section";
+
   stickersSection.style.marginTop = "16px";
+
   stickersSection.innerHTML = `
+
     <div class="section-header">
+
       <span>Nálepky</span>
+
       <span>Balení</span>
+
     </div>
+
   `;
 
+
+
   sklad.forEach((it, idx) => {
+
     const qty = Number(it.qty || 0);
+
     const state = getState(qty, it.type);
+
     const pct = getPercentage(qty, it.type);
 
+
+
     const div = document.createElement("div");
+
     div.className = "item";
+
     
+
     const piecesText = it.type === "pieces" ? "" : `<div class="pieces" style="font-size:12px;color:var(--wolt-green-2);font-weight:600;margin-top:2px;">Celkem: ${qty * ksNaKrabici[idx]} ks</div>`;
 
+
+
     div.innerHTML = `
+
       <div class="ic">${it.type === "pieces" ? "🏷️" : "📦"}</div>
+
       <div class="meta">
+
         <div class="name">${it.label}</div>
+
         <div class="code">${it.id}</div>
+
         <div class="progress-container">
+
           <div class="progress-fill ${state}" style="width:${pct}%"></div>
+
         </div>
+
         ${piecesText}
+
       </div>
+
       <div class="qty-container">
+
         <button class="qty-btn" data-idx="${idx}" data-op="-">-</button>
+
         <input type="number" min="0" value="${qty}" data-idx="${idx}" />
+
         <button class="qty-btn" data-idx="${idx}" data-op="+">+</button>
+
       </div>
+
     `;
 
+
+
     if(it.type === "palette") {
+
       bagsSection.appendChild(div);
+
     } else {
+
       stickersSection.appendChild(div);
+
     }
+
+
 
     const input = div.querySelector('input[type=number]');
 
+    const fill = div.querySelector('.progress-fill');
+
+    const piecesDiv = div.querySelector('.pieces');
+
+
+
+    function updateQty(newQty){
+
+      sklad[idx].qty = newQty;
+
+      localStorage.setItem(`wm_sklad_${currentBranchKey}`, JSON.stringify(sklad));
+
+      const pct = getPercentage(newQty, it.type);
+
+      const state = getState(newQty, it.type);
+
+      fill.style.width = pct + '%';
+
+      fill.className = 'progress-fill ' + state;
+
+      if(piecesDiv) {
+
+        piecesDiv.textContent = `Celkem: ${newQty * ksNaKrabici[idx]} ks`;
+
+      }
+
+    }
+
+
+
     input.addEventListener('blur', e=>{
+
       let v = parseInt(e.target.value);
+
       if(isNaN(v) || v < 0) v = 0;
-      updateFirebaseItem(idx, v);
+
+      updateQty(v);
+
+      updateFirebaseSklad();
+
     });
+
+
 
     div.querySelectorAll('.qty-btn').forEach(btn => {
+
       btn.addEventListener('click', () => {
+
         let stepVal = 1;
-        let currentQty = Number(sklad[idx].qty || 0);
-        let val = currentQty + (btn.dataset.op === "+" ? stepVal : -stepVal);
+
+        let val = sklad[idx].qty + (btn.dataset.op === "+" ? stepVal : -stepVal);
+
         if (val < 0) val = 0;
-        updateFirebaseItem(idx, val);
+
+        updateQty(val);
+
+        input.value = val;
+
+        updateFirebaseSklad();
+
       });
+
     });
+
   });
+
+
 
   inventoryContainer.appendChild(bagsSection);
+
   inventoryContainer.appendChild(stickersSection);
+
 }
+
+
+
+// Přepínání jednotek s ukládáním konceptu
 
 document.querySelectorAll('.unit-toggle-btn').forEach(btn => {
+
   btn.addEventListener('click', () => {
+
     const input = document.getElementById(btn.dataset.input);
+
     const currentUnit = input.dataset.unit;
+
     const nextUnit = currentUnit === "palette" ? "pieces" : "palette";
+
     
+
     input.value = "0";
+
     setToggleBtnState(btn, nextUnit);
+
     saveCurrentOrderDraft(currentBranchKey);
+
   });
+
 });
+
+
 
 function onOrderBtnClick(e){
+
   const target = document.getElementById(e.currentTarget.dataset.target);
+
   const step = parseFloat(target.step || e.currentTarget.dataset.step || 1);
+
   let val = parseFloat(target.value || 0);
+
   val += e.currentTarget.dataset.op === "+" ? step : -step;
+
   if(val < 0) val = 0;
+
   target.value = val;
+
   saveCurrentOrderDraft(currentBranchKey);
+
 }
+
+
 
 oInputs.forEach(input => {
+
   input.addEventListener('input', () => {
+
     saveCurrentOrderDraft(currentBranchKey);
+
   });
+
 });
+
+
+
+// Render historie — položky pod sebou
 
 function renderHistory(){
+
   historyList.innerHTML="";
+
   history.slice().reverse().forEach(h=>{
+
     const div=document.createElement('div');
+
     div.className='history-item';
+
     
+
     let itemsListHtml = "";
+
     if (Array.isArray(h.items)) {
+
       itemsListHtml = h.items.map(item => 
+
         `<div style="font-size:13px;line-height:1.4;"><strong>${item.qtyText}</strong> — ${item.label}</div>`
+
       ).join('');
+
     } else {
+
       itemsListHtml = `<div style="font-size:13px">${h.text}</div>`;
+
     }
+
+
 
     div.innerHTML=`
+
       <div class="history-date">📅 ${h.date}</div>
+
       <div style="display:flex;flex-direction:column;gap:3px;margin-top:4px;">
+
         ${itemsListHtml}
+
       </div>
+
     `;
+
     historyList.appendChild(div);
+
   });
+
 }
+
+
 
 document.getElementById("historyToggle").addEventListener("click",()=>{document.getElementById("historyPanel").classList.toggle("open");});
+
 document.getElementById("clearHistory").addEventListener("click",()=>{
+
   history=[]; 
+
   localStorage.setItem(`wm_orders_${currentBranchKey}`,JSON.stringify(history)); 
+
   renderHistory(); 
+
   set(historyRef, null);
+
 });
 
-// Zajištění funkčnosti tlačítka plus/mínus v formuláři Objednávka
 document.querySelectorAll('.order-row .qty-btn').forEach(b=>b.addEventListener('click',onOrderBtnClick));
 
+
+
 function getJednotkaText(c, inputEl){
+
   const unit = inputEl.dataset.unit;
+
   
+
   if (unit === "palette") {
+
     const wholePallets = Math.floor(c);
+
     const hasHalf = (c % 1) !== 0;
 
+
+
     let parts = [];
+
     if (wholePallets > 0) {
+
       parts.push(`${wholePallets}x PALETA`);
+
     }
+
     if (hasHalf) {
+
       parts.push(`1x POLOVIČNÍ PALETA`);
+
     }
+
+
 
     return parts.join(" + ");
+
   }
+
   
+
   return `${c}x BALENÍ`;
+
 }
+
+
 
 function resetOrderForm(){
+
   oInputs.forEach(i => i.value = 0);
+
   saveCurrentOrderDraft(currentBranchKey);
+
 }
 
+
+
 function sendMail(){
+
   const counts = oInputs.map(input => parseFloat(input.value || 0));
+
   let emailLines = [];
+
   let historyItems = [];
 
+
+
   counts.forEach((c, i) => {
+
     if(c > 0) {
+
       const formattedQtyText = getJednotkaText(c, oInputs[i]);
+
       emailLines.push(`${formattedQtyText}\n  Položka: ${sklad[i].id} — ${sklad[i].label}`);
+
       historyItems.push({
+
         qtyText: formattedQtyText,
+
         label: sklad[i].label
+
       });
+
     }
+
   });
 
+
+
   if(emailLines.length === 0){ alert("Zadejte alespoň jednu položku."); return; }
+
   
+
   const currentBranch = BRANCHES[currentBranchKey];
+
   const subjectBranchName = currentBranch.name.replace(/^WM\s*/, "Wolt Market ");
 
+
+
+  // Příprava poznámky pro Žižkov
+
   let extraNote = "";
+
   if (currentBranchKey === "zizkov" && zizkovElevatorCheck.checked) {
+
     extraNote = "\n\nProsím, aby palety nepřesahovaly 180cm (i s paletou) a případně nezapomenout na rohovníky, aby se nezbortily. 🙏 (Musíme se vejít do výtahu)";
+
   }
 
+
+
   const body = 
+
 `Dobrý den,
+
+
 
 prosím o objednání pro pobočku ${currentBranch.name}:
 
+
+
 --------------------------------------------------
+
 ${emailLines.join("\n\n")}
+
 --------------------------------------------------${extraNote}
+
+
 
 Děkuji a přeji příjemný zbytek dne.`;
 
+
+
   const gmailURL = `https://mail.google.com/mail/?view=cm&fs=1&to=sklad.hrusov@vas-solutions.cz&cc=${encodeURIComponent(currentBranch.emailCc)}&su=${encodeURIComponent("Objednávka materiálu — " + subjectBranchName)}&body=${encodeURIComponent(body)}`;
 
+
+
+  // Vytvořit objekt záznamu
+
   const newEntry = {
+
     date: (new Date()).toLocaleString('cs-CZ'),
+
     items: historyItems
+
   };
 
+
+
+  // 1. Ihned uložit lokálně a zobrazit na obrazovce
+
   history.push(newEntry);
+
   localStorage.setItem(`wm_orders_${currentBranchKey}`, JSON.stringify(history));
+
   renderHistory();
 
+
+
+  // 2. Odeslat do Firebase databáze pro synch mezi uživateli
+
   const newOrderRef = ref(db, `history/${currentBranchKey}`);
+
   push(newOrderRef, newEntry);
 
+
+
   resetOrderForm();
+
   window.open(gmailURL, '_blank');
+
 }
 
+
+
 document.getElementById("sendBtn").addEventListener("click",sendMail);
+
 document.getElementById("resetBtn").addEventListener("click",resetOrderForm);
 
+
+
 const darkToggle=document.getElementById("darkToggle");
+
 if(localStorage.getItem("THEME_KEY")==="dark"){document.body.classList.add("dark"); darkToggle.textContent="🌙";}
+
 darkToggle.addEventListener("click",()=>{
+
   const isDark=document.body.classList.toggle("dark");
+
   localStorage.setItem("THEME_KEY",isDark?"dark":"light");
+
   darkToggle.textContent=isDark?"🌙":"🌞";
+
 });
 
+
+
+// Inicializace výchozí pobočky
+
 initBranch(currentBranchKey);
+
 </script>
+
 </body>
+
 </html>
