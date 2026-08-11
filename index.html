@@ -393,7 +393,6 @@ const oInputs = [
   document.getElementById("o5")
 ];
 
-// Naplnění výběru poboček
 Object.keys(BRANCHES).forEach(key => {
   const opt = document.createElement("option");
   opt.value = key;
@@ -507,7 +506,6 @@ function initBranch(branchKey) {
 
   history = JSON.parse(localStorage.getItem(storageKeyHistory) || "[]");
 
-  // Reálný poslech pro Sklad v reálném čase
   onValue(skladRef, snapshot => {
     const data = snapshot.val();
     if (data && Array.isArray(data)) {
@@ -524,7 +522,6 @@ function initBranch(branchKey) {
     }
   });
 
-  // Reálný poslech pro Historii
   onValue(historyRef, snapshot => {
     const data = snapshot.val();
     if(data) {
@@ -624,7 +621,8 @@ function renderInventory(){
     div.querySelectorAll('.qty-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         let stepVal = 1;
-        let val = sklad[idx].qty + (btn.dataset.op === "+" ? stepVal : -stepVal);
+        let currentQty = Number(sklad[idx].qty || 0);
+        let val = currentQty + (btn.dataset.op === "+" ? stepVal : -stepVal);
         if (val < 0) val = 0;
         updateFirebaseItem(idx, val);
       });
@@ -695,6 +693,8 @@ document.getElementById("clearHistory").addEventListener("click",()=>{
   renderHistory(); 
   set(historyRef, null);
 });
+
+// Zajištění funkčnosti tlačítka plus/mínus v formuláři Objednávka
 document.querySelectorAll('.order-row .qty-btn').forEach(b=>b.addEventListener('click',onOrderBtnClick));
 
 function getJednotkaText(c, inputEl){
