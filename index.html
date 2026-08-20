@@ -53,6 +53,19 @@ body.dark .ic{color:var(--wolt-green-1);}
 .meta .name{font-weight:700;font-size:14px;}
 .meta .code{font-size:12px;color:var(--muted);margin-top:4px;}
 .qty-container{display:flex;gap:4px;align-items:center;justify-content:flex-end;flex-shrink:0;min-width:130px;position:relative;}
+
+/* Zákaz psaní a skrytí šipek */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+  user-select: none;
+  cursor: default;
+}
+
 .qty-container input[type="number"], .order-row input[type="number"]{
   width:60px;padding:8px;border-radius:8px;border:1px solid rgba(0,0,0,0.1);text-align:center;font-weight:700;background:transparent;color:inherit;transition:border .25s, color .25s, transform .2s;font-size:14px;
 }
@@ -71,6 +84,7 @@ body.dark .qty-container input[type="number"], body.dark .order-row input[type="
   cursor:pointer;
   transition:transform .2s,background .2s,box-shadow .2s;
   font-size:14px;
+  user-select: none;
 }
 .qty-btn:hover{
   transform:translateY(-2px);
@@ -154,7 +168,6 @@ body.dark .unit-toggle-btn.unit-pieces {
   background: rgba(34,197,94,0.25);
 }
 
-/* STYL PRO VOLITELNOU POZNÁMKU PRO ŽIŽKOV */
 .zizkov-note-container {
   display: none;
   align-items: center;
@@ -249,7 +262,7 @@ body.dark #resetBtn:hover, body.dark #clearHistory:hover{
       <div class="label">Taška Wolt Market 320x170x400mm</div>
       <div class="order-controls-group">
         <button class="qty-btn" data-target="o1" data-op="-">-</button>
-        <input id="o1" type="number" min="0" step="0.5" value="0" data-unit="palette">
+        <input id="o1" type="number" min="0" step="0.5" value="0" data-unit="palette" readonly>
         <button class="qty-btn" data-target="o1" data-op="+">+</button>
         <button class="unit-toggle-btn unit-palette" data-input="o1" data-unit="palette">Palety</button>
       </div>
@@ -259,7 +272,7 @@ body.dark #resetBtn:hover, body.dark #clearHistory:hover{
       <div class="label">Sáček Wolt Market 200x90x370mm</div>
       <div class="order-controls-group">
         <button class="qty-btn" data-target="o2" data-op="-">-</button>
-        <input id="o2" type="number" min="0" step="1" value="0" data-unit="pieces">
+        <input id="o2" type="number" min="0" step="1" value="0" data-unit="pieces" readonly>
         <button class="qty-btn" data-target="o2" data-op="+">+</button>
         <button class="unit-toggle-btn unit-pieces" data-input="o2" data-unit="pieces">Balení</button>
       </div>
@@ -269,7 +282,7 @@ body.dark #resetBtn:hover, body.dark #clearHistory:hover{
       <div class="label">Sáček Wolt Market 160x50x280mm</div>
       <div class="order-controls-group">
         <button class="qty-btn" data-target="o3" data-op="-">-</button>
-        <input id="o3" type="number" min="0" step="1" value="0" data-unit="pieces">
+        <input id="o3" type="number" min="0" step="1" value="0" data-unit="pieces" readonly>
         <button class="qty-btn" data-target="o3" data-op="+">+</button>
         <button class="unit-toggle-btn unit-pieces" data-input="o3" data-unit="pieces">Balení</button>
       </div>
@@ -279,7 +292,7 @@ body.dark #resetBtn:hover, body.dark #clearHistory:hover{
       <div class="label">Vločky nálepky</div>
       <div class="order-controls-group">
         <button class="qty-btn" data-target="o4" data-op="-" data-step="1">-</button>
-        <input id="o4" type="number" min="0" step="1" value="0" data-unit="pieces">
+        <input id="o4" type="number" min="0" step="1" value="0" data-unit="pieces" readonly>
         <button class="qty-btn" data-target="o4" data-op="+" data-step="1">+</button>
         <div style="font-size:11px;color:var(--muted);font-weight:800;padding:0 4px;text-transform:uppercase;min-width:68px;text-align:center;">balení</div>
       </div>
@@ -289,7 +302,7 @@ body.dark #resetBtn:hover, body.dark #clearHistory:hover{
       <div class="label">Uzavření tašky nálepky</div>
       <div class="order-controls-group">
         <button class="qty-btn" data-target="o5" data-op="-" data-step="1">-</button>
-        <input id="o5" type="number" min="0" step="1" value="0" data-unit="pieces">
+        <input id="o5" type="number" min="0" step="1" value="0" data-unit="pieces" readonly>
         <button class="qty-btn" data-target="o5" data-op="+" data-step="1">+</button>
         <div style="font-size:11px;color:var(--muted);font-weight:800;padding:0 4px;text-transform:uppercase;min-width:68px;text-align:center;">balení</div>
       </div>
@@ -405,7 +418,6 @@ Object.keys(BRANCHES).forEach(key => {
   branchSelect.appendChild(opt);
 });
 
-// Vizualizace tlačítka přepínače jednotek
 function setToggleBtnState(btn, unit) {
   const input = document.getElementById(btn.dataset.input);
   input.dataset.unit = unit;
@@ -424,7 +436,6 @@ function setToggleBtnState(btn, unit) {
   }
 }
 
-// Uložení rozpracované objednávky pro danou pobočku
 function saveCurrentOrderDraft(branchKey) {
   if (!branchKey) return;
   const draftData = oInputs.map(input => {
@@ -436,7 +447,6 @@ function saveCurrentOrderDraft(branchKey) {
   localStorage.setItem(`wm_order_draft_${branchKey}`, JSON.stringify(draftData));
 }
 
-// Načtení rozpracované objednávky pro danou pobočku
 function loadOrderDraft(branchKey) {
   const savedDraft = localStorage.getItem(`wm_order_draft_${branchKey}`);
   const defaultUnits = ["palette", "pieces", "pieces", "pieces", "pieces"];
@@ -469,8 +479,18 @@ function loadOrderDraft(branchKey) {
   });
 }
 
+function updateFirebaseSklad() {
+  if (!skladRef) return;
+  const cleanData = sklad.map(item => ({
+    id: String(item.id),
+    label: String(item.label),
+    qty: Number(item.qty) || 0,
+    type: String(item.type)
+  }));
+  set(skladRef, cleanData);
+}
+
 function initBranch(branchKey) {
-  // Uložit koncept stávající pobočky než přepneme na novou
   if (currentBranchKey && currentBranchKey !== branchKey) {
     saveCurrentOrderDraft(currentBranchKey);
   }
@@ -478,7 +498,6 @@ function initBranch(branchKey) {
   currentBranchKey = branchKey;
   localStorage.setItem("selected_branch", branchKey);
 
-  // Zobrazení/Skrytí volby pro výtah na Žižkově
   if (branchKey === "zizkov") {
     zizkovNoteContainer.style.display = "flex";
   } else {
@@ -492,62 +511,44 @@ function initBranch(branchKey) {
   pageTitle.textContent = `Objednávka materiálu — ${branchData.name}`;
   ccList.textContent = branchData.emailCc;
 
-  // Načíst správný koncept objednávky hned při inicializaci
   loadOrderDraft(branchKey);
 
   skladRef = ref(db, `sklad/${branchKey}`);
   historyRef = ref(db, `history/${branchKey}`);
 
-  const storageKeySklad = `wm_sklad_${branchKey}`;
-  const storageKeyHistory = `wm_orders_${branchKey}`;
-
-  // Bezpečné načtení z localStorage
-  const localSklad = localStorage.getItem(storageKeySklad);
-  if (localSklad) {
-    try { sklad = JSON.parse(localSklad); } catch(e){}
-  } else {
-    sklad = JSON.parse(JSON.stringify(defaultData));
-  }
-
-  history = JSON.parse(localStorage.getItem(storageKeyHistory) || "[]");
-
-  // Reálný poslech pro Sklad (BEZPEČNÝ PROTI PŘEPSÁNÍ)
   onValue(skladRef, snapshot => {
     const data = snapshot.val();
     if (data && Array.isArray(data)) {
       sklad = data.map((item, idx) => ({
-        ...item,
+        id: item.id || defaultData[idx]?.id || "",
         label: defaultData[idx] ? defaultData[idx].label : item.label,
-        type: defaultData[idx] ? defaultData[idx].type : item.type
+        type: defaultData[idx] ? defaultData[idx].type : item.type,
+        qty: Number(item.qty) || 0
       }));
-      localStorage.setItem(storageKeySklad, JSON.stringify(sklad));
+      localStorage.setItem(`wm_sklad_${branchKey}`, JSON.stringify(sklad));
       renderInventory();
     } else {
-      // Pouze pokud ve Firebase data pro danou pobočku ZATÍM VŮBEC NEEXISTUJÍ
       sklad = JSON.parse(JSON.stringify(defaultData));
       updateFirebaseSklad();
     }
   });
 
-  // Reálný poslech pro Historii
   onValue(historyRef, snapshot => {
     const data = snapshot.val();
     if(data) {
       history = Object.keys(data).map(key => data[key]);
-      localStorage.setItem(storageKeyHistory, JSON.stringify(history));
+      localStorage.setItem(`wm_orders_${branchKey}`, JSON.stringify(history));
+      renderHistory();
+    } else {
+      history = [];
       renderHistory();
     }
   });
-
-  renderInventory();
-  renderHistory();
 }
 
 branchSelect.addEventListener("change", (e) => {
   initBranch(e.target.value);
 });
-
-function updateFirebaseSklad(){ set(skladRef, sklad); }
 
 function getState(q, type){
   if(type === "pieces") {
@@ -609,7 +610,7 @@ function renderInventory(){
       </div>
       <div class="qty-container">
         <button class="qty-btn" data-idx="${idx}" data-op="-">-</button>
-        <input type="number" min="0" value="${qty}" data-idx="${idx}" />
+        <input type="number" min="0" value="${qty}" data-idx="${idx}" readonly />
         <button class="qty-btn" data-idx="${idx}" data-op="+">+</button>
       </div>
     `;
@@ -620,37 +621,19 @@ function renderInventory(){
       stickersSection.appendChild(div);
     }
 
-    const input = div.querySelector('input[type=number]');
-    const fill = div.querySelector('.progress-fill');
-    const piecesDiv = div.querySelector('.pieces');
-
-    function updateQty(newQty){
+    function updateQtyAndSave(newQty){
       sklad[idx].qty = newQty;
       localStorage.setItem(`wm_sklad_${currentBranchKey}`, JSON.stringify(sklad));
-      const pct = getPercentage(newQty, it.type);
-      const state = getState(newQty, it.type);
-      fill.style.width = pct + '%';
-      fill.className = 'progress-fill ' + state;
-      if(piecesDiv) {
-        piecesDiv.textContent = `Celkem: ${newQty * ksNaKrabici[idx]} ks`;
-      }
-    }
-
-    input.addEventListener('blur', e=>{
-      let v = parseInt(e.target.value);
-      if(isNaN(v) || v < 0) v = 0;
-      updateQty(v);
       updateFirebaseSklad();
-    });
+    }
 
     div.querySelectorAll('.qty-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         let stepVal = 1;
-        let val = sklad[idx].qty + (btn.dataset.op === "+" ? stepVal : -stepVal);
+        let currentQty = Number(sklad[idx].qty) || 0;
+        let val = currentQty + (btn.dataset.op === "+" ? stepVal : -stepVal);
         if (val < 0) val = 0;
-        updateQty(val);
-        input.value = val;
-        updateFirebaseSklad();
+        updateQtyAndSave(val);
       });
     });
   });
@@ -659,7 +642,6 @@ function renderInventory(){
   inventoryContainer.appendChild(stickersSection);
 }
 
-// Přepínání jednotek s ukládáním konceptu
 document.querySelectorAll('.unit-toggle-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     const input = document.getElementById(btn.dataset.input);
@@ -682,13 +664,6 @@ function onOrderBtnClick(e){
   saveCurrentOrderDraft(currentBranchKey);
 }
 
-oInputs.forEach(input => {
-  input.addEventListener('input', () => {
-    saveCurrentOrderDraft(currentBranchKey);
-  });
-});
-
-// Render historie — položky pod sebou
 function renderHistory(){
   historyList.innerHTML="";
   history.slice().reverse().forEach(h=>{
@@ -770,7 +745,6 @@ function sendMail(){
   const currentBranch = BRANCHES[currentBranchKey];
   const subjectBranchName = currentBranch.name.replace(/^WM\s*/, "Wolt Market ");
 
-  // Příprava poznámky pro Žižkov
   let extraNote = "";
   if (currentBranchKey === "zizkov" && zizkovElevatorCheck.checked) {
     extraNote = "\n\nProsím, aby palety nepřesahovaly 180cm (i s paletou) a případně nezapomenout na rohovníky, aby se nezbortily. 🙏 (Musíme se vejít do výtahu)";
@@ -789,18 +763,11 @@ Děkuji a přeji příjemný zbytek dne.`;
 
   const gmailURL = `https://mail.google.com/mail/?view=cm&fs=1&to=sklad.hrusov@vas-solutions.cz&cc=${encodeURIComponent(currentBranch.emailCc)}&su=${encodeURIComponent("Objednávka materiálu — " + subjectBranchName)}&body=${encodeURIComponent(body)}`;
 
-  // Vytvořit objekt záznamu
   const newEntry = {
     date: (new Date()).toLocaleString('cs-CZ'),
     items: historyItems
   };
 
-  // 1. Ihned uložit lokálně a zobrazit na obrazovce
-  history.push(newEntry);
-  localStorage.setItem(`wm_orders_${currentBranchKey}`, JSON.stringify(history));
-  renderHistory();
-
-  // 2. Odeslat do Firebase databáze pro synch mezi uživateli
   const newOrderRef = ref(db, `history/${currentBranchKey}`);
   push(newOrderRef, newEntry);
 
