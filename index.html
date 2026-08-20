@@ -54,7 +54,7 @@ body.dark .ic{color:var(--wolt-green-1);}
 .meta .code{font-size:12px;color:var(--muted);margin-top:4px;}
 .qty-container{display:flex;gap:4px;align-items:center;justify-content:flex-end;flex-shrink:0;min-width:130px;position:relative;}
 
-/* Zákaz psaní a skrytí šipek */
+/* Skrytí šipek číselného pole, ale umožnění psaní textu */
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
@@ -62,8 +62,7 @@ input[type="number"]::-webkit-inner-spin-button {
 }
 input[type="number"] {
   -moz-appearance: textfield;
-  user-select: none;
-  cursor: default;
+  cursor: text;
 }
 
 .qty-container input[type="number"], .order-row input[type="number"]{
@@ -262,7 +261,7 @@ body.dark #resetBtn:hover, body.dark #clearHistory:hover{
       <div class="label">Taška Wolt Market 320x170x400mm</div>
       <div class="order-controls-group">
         <button class="qty-btn" data-target="o1" data-op="-">-</button>
-        <input id="o1" type="number" min="0" step="0.5" value="0" data-unit="palette" readonly>
+        <input id="o1" type="number" min="0" step="0.5" value="0" data-unit="palette">
         <button class="qty-btn" data-target="o1" data-op="+">+</button>
         <button class="unit-toggle-btn unit-palette" data-input="o1" data-unit="palette">Palety</button>
       </div>
@@ -272,7 +271,7 @@ body.dark #resetBtn:hover, body.dark #clearHistory:hover{
       <div class="label">Sáček Wolt Market 200x90x370mm</div>
       <div class="order-controls-group">
         <button class="qty-btn" data-target="o2" data-op="-">-</button>
-        <input id="o2" type="number" min="0" step="1" value="0" data-unit="pieces" readonly>
+        <input id="o2" type="number" min="0" step="1" value="0" data-unit="pieces">
         <button class="qty-btn" data-target="o2" data-op="+">+</button>
         <button class="unit-toggle-btn unit-pieces" data-input="o2" data-unit="pieces">Balení</button>
       </div>
@@ -282,7 +281,7 @@ body.dark #resetBtn:hover, body.dark #clearHistory:hover{
       <div class="label">Sáček Wolt Market 160x50x280mm</div>
       <div class="order-controls-group">
         <button class="qty-btn" data-target="o3" data-op="-">-</button>
-        <input id="o3" type="number" min="0" step="1" value="0" data-unit="pieces" readonly>
+        <input id="o3" type="number" min="0" step="1" value="0" data-unit="pieces">
         <button class="qty-btn" data-target="o3" data-op="+">+</button>
         <button class="unit-toggle-btn unit-pieces" data-input="o3" data-unit="pieces">Balení</button>
       </div>
@@ -292,7 +291,7 @@ body.dark #resetBtn:hover, body.dark #clearHistory:hover{
       <div class="label">Vločky nálepky</div>
       <div class="order-controls-group">
         <button class="qty-btn" data-target="o4" data-op="-" data-step="1">-</button>
-        <input id="o4" type="number" min="0" step="1" value="0" data-unit="pieces" readonly>
+        <input id="o4" type="number" min="0" step="1" value="0" data-unit="pieces">
         <button class="qty-btn" data-target="o4" data-op="+" data-step="1">+</button>
         <div style="font-size:11px;color:var(--muted);font-weight:800;padding:0 4px;text-transform:uppercase;min-width:68px;text-align:center;">balení</div>
       </div>
@@ -302,7 +301,7 @@ body.dark #resetBtn:hover, body.dark #clearHistory:hover{
       <div class="label">Uzavření tašky nálepky</div>
       <div class="order-controls-group">
         <button class="qty-btn" data-target="o5" data-op="-" data-step="1">-</button>
-        <input id="o5" type="number" min="0" step="1" value="0" data-unit="pieces" readonly>
+        <input id="o5" type="number" min="0" step="1" value="0" data-unit="pieces">
         <button class="qty-btn" data-target="o5" data-op="+" data-step="1">+</button>
         <div style="font-size:11px;color:var(--muted);font-weight:800;padding:0 4px;text-transform:uppercase;min-width:68px;text-align:center;">balení</div>
       </div>
@@ -610,7 +609,7 @@ function renderInventory(){
       </div>
       <div class="qty-container">
         <button class="qty-btn" data-idx="${idx}" data-op="-">-</button>
-        <input type="number" min="0" value="${qty}" data-idx="${idx}" readonly />
+        <input type="number" min="0" value="${qty}" data-idx="${idx}" />
         <button class="qty-btn" data-idx="${idx}" data-op="+">+</button>
       </div>
     `;
@@ -627,6 +626,15 @@ function renderInventory(){
       updateFirebaseSklad();
     }
 
+    // Obsluha ručního zadání z klávesnice
+    const inputEl = div.querySelector('input[type="number"]');
+    inputEl.addEventListener('change', () => {
+      let val = parseFloat(inputEl.value);
+      if (isNaN(val) || val < 0) val = 0;
+      updateQtyAndSave(val);
+    });
+
+    // Obsluha tlačítek + a -
     div.querySelectorAll('.qty-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         let stepVal = 1;
@@ -641,6 +649,13 @@ function renderInventory(){
   inventoryContainer.appendChild(bagsSection);
   inventoryContainer.appendChild(stickersSection);
 }
+
+// Přidání poslechů na ruční zápis do objednávkových polí
+oInputs.forEach(input => {
+  input.addEventListener('input', () => {
+    saveCurrentOrderDraft(currentBranchKey);
+  });
+});
 
 document.querySelectorAll('.unit-toggle-btn').forEach(btn => {
   btn.addEventListener('click', () => {
